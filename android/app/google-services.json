@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "899961267483",
+    "firebase_url": "https://codaverse-ccf5e-default-rtdb.firebaseio.com",
+    "project_id": "codaverse-ccf5e",
+    "storage_bucket": "codaverse-ccf5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899961267483:android:2ccb99950c387e3d94dfbe",
+        "android_client_info": {
+          "package_name": "com.example.gdg_hack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqHJrqYu2V7_FC96qMmIOO74cfwkGGSrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
