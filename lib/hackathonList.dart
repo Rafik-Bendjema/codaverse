@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gdg_hack/models/Hackathon.dart';
+import 'package:gdg_hack/youHackathon.dart';
 
 class HackathonListPage extends StatelessWidget {
   const HackathonListPage({super.key});
@@ -20,7 +21,19 @@ class HackathonListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Hackathons")),
+      appBar: AppBar(
+        title: const Text("Hackathons"),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => YourHackathonPage()));
+              },
+              child: Text("your hackathon"))
+        ],
+      ),
       body: StreamBuilder<List<Hackathon>>(
         stream: getHackathons(),
         builder: (context, snapshot) {

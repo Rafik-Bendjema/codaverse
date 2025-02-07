@@ -45,7 +45,11 @@ class _PlaygroundState extends State<Playground> {
                   ],
                 ),
               ),
-              Expanded(child: GameWidget(game: Codavers(hackathon: _hackathon)))
+              Expanded(
+                  child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GameWidget(game: Codavers(hackathon: _hackathon)),
+              ))
             ],
           ),
         ),

@@ -16,9 +16,11 @@ class FirestoreHackathonDb implements HackathonDb {
   @override
   Future<Hackathon?> getHackathon(String hackathonId) async {
     try {
+      print("i am here and here is the hackathon id $hackathonId");
       DocumentSnapshot doc =
           await _firestore.collection(_collectionPath).doc(hackathonId).get();
       if (doc.exists) {
+        print("doc exist");
         return Hackathon.fromMap(doc.id, doc.data() as Map<String, dynamic>);
       }
       return null;

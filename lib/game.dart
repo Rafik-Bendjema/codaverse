@@ -37,24 +37,12 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
     add(mainPlayer);
 
     // Generate tables
-    for (var i = 0; i < 6; i++) {
-      tables.add(TableBlock(playersAtTable: Random().nextInt(5)));
+    for (var i = 0; i < hackathon.teams.length; i++) {
+      tables.add(TableBlock(playersAtTable: hackathon.teams[i].members.length));
     }
     _generateTables();
 
     // Generate 3 random players in playground
-    for (var i = 0; i < 3; i++) {
-      var randomX = Random().nextDouble() * size.x * 0.8;
-      var randomY = Random().nextDouble() * size.y * 0.8;
-
-      var player = Player(
-        name: "Player ${i + 1}",
-        role: "player",
-      )..position = Vector2(randomX, randomY);
-
-      playgroundPlayers.add(player);
-      add(player);
-    }
 
     // Add hover text (initially hidden)
     hoverText = TextComponent(

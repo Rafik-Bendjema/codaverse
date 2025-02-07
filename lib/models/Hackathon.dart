@@ -19,7 +19,7 @@ class Hackathon {
     required this.maxTeams,
     required this.status,
   }) {
-    id = uuid.v1();
+    id ??= uuid.v1(); // Generate id only if it's null
   }
 
   // Convert Hackathon to Firestore-compatible map
@@ -35,26 +35,26 @@ class Hackathon {
 
   // Create Hackathon from Firestore data (async to fetch teams)
   static Future<Hackathon> fromMap(String id, Map<String, dynamic> data) async {
-    List<Team> teamList = [];
-
-    // Fetch teams from the subcollection inside this hackathon document
     var teamsQuery = await FirebaseFirestore.instance
-        .collection('hackathons') // Parent collection
-        .doc(id) // Current Hackathon ID
-        .collection('teams') // Subcollection
+        .collection('hackathons')
+        .doc(id)
+        .collection('teams')
         .get();
 
-    /*teamList = await Future.wait(teamsQuery.docs.map((doc) async {
-      return Team.fromMap(doc.id, doc.data());
-    }));*/
+    print("Here are the teams: ${teamsQuery.docs.length}");
+
+    // Fix: Wait for all the Future<Team> results to resolve
+    var listTeams = await Future.wait(
+      teamsQuery.docs.map((doc) => Team.fromMap(doc.id, doc.data())),
+    );
 
     return Hackathon(
       id: id,
-      name: data['name'],
-      companyId: data['company_id'],
-      maxTeams: data['maxTeams'],
-      status: data['status'],
-      teams: teamList,
+      name: data['name'] ?? '',
+      companyId: data['company_id'] ?? '',
+      maxTeams: data['maxTeams'] ?? 0,
+      status: data['status'] ?? 'pending',
+      teams: listTeams, // ✅ Now teams are correctly assigned
     );
   }
 }
