@@ -4,8 +4,10 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:gdg_hack/backend/realtimeService.dart';
+import 'package:gdg_hack/backend/user_db.dart';
 import 'package:gdg_hack/models/Hackathon.dart';
-import 'package:gdg_hack/player.dart';
+import 'package:gdg_hack/models/userModel.dart';
+import 'package:gdg_hack/player.dart'; // Assuming Player class is in player.dart
 import 'package:gdg_hack/table.dart';
 import 'package:gdg_hack/private_chat_dialog.dart';
 
@@ -19,6 +21,7 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
   final BuildContext context;
   late RealtimePositionService realtimeService;
   String? mainPlayerId;
+  final UserDb _userDb = userDb_impl(); // Instantiate UserDb
 
   final Function(String senderId, String message) _handleIncomingMessage;
 
@@ -45,6 +48,13 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
       return;
     }
 
+    // Fetch main player's role
+    String mainPlayerRole = "player"; // Default role
+    UserModel? mainUserModel = await _userDb.getUser(mainPlayerId!);
+    if (mainUserModel != null && mainUserModel.role == 'Mentor') {
+      mainPlayerRole = 'mentor';
+    }
+    print("here is the role $mainPlayerRole");
     final background = SpriteComponent()
       ..sprite = await loadSprite('bg.png')
       ..size = size
@@ -56,20 +66,33 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
     }
     _generateTables();
 
-    mainPlayer = Player(id: mainPlayerId!, name: "You", role: "player")
+    mainPlayer = Player(
+        id: mainPlayerId!, name: "You", role: mainPlayerRole) // Pass role here
       ..position =
           tables.isNotEmpty ? tables[0].position.clone() : Vector2.zero();
     add(mainPlayer);
 
     realtimeService.updatePlayerPosition(mainPlayerId, mainPlayer.position);
 
-    realtimeService.listenForPlayerPositions((playerId, position, playerName) {
+    realtimeService
+        .listenForPlayerPositions((playerId, position, playerName) async {
       if (playerId == mainPlayerId) return;
       final index = playgroundPlayers.indexWhere((p) => p.id == playerId);
+
+      // Fetch role for other players
+      String otherPlayerRole = "player"; // Default role
+      UserModel? otherUserModel = await _userDb.getUser(playerId);
+      if (otherUserModel != null && otherUserModel.role == 'mentor') {
+        otherPlayerRole = 'mentor';
+      }
+
       if (index != -1) {
         playgroundPlayers[index].position = position;
       } else {
-        final newPlayer = Player(id: playerId, name: playerName, role: "player")
+        final newPlayer = Player(
+            id: playerId,
+            name: playerName,
+            role: otherPlayerRole) // Pass role here
           ..position = position;
         playgroundPlayers.add(newPlayer);
         add(newPlayer);

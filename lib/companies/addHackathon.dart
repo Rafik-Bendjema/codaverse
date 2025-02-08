@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gdg_hack/backend/hachathon_db.dart';
+import 'package:gdg_hack/backend/user_db.dart';
 import 'package:gdg_hack/companyHackathons.dart';
 import 'package:gdg_hack/models/Hackathon.dart';
 import 'package:gdg_hack/models/Team.dart';
-import 'package:gdg_hack/models/UserModel.dart'; // Import UserModel
+import 'package:gdg_hack/models/userModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/authService.dart';
 
@@ -19,10 +21,11 @@ class _AddHackathonState extends State<AddHackathon> {
   final _nameController = TextEditingController();
   final _maxTeamsController = TextEditingController();
   final HackathonDb _hackathonDb = FirestoreHackathonDb();
+  final UserDb _userDb = userDb_impl();
   String? companyId;
   String status = "Upcoming";
   List<Team> teams = [];
-  List<UserModel> _availableMentors = []; // Use UserModel here
+  List<UserModel> _availableMentors = [];
   final List<String> _selectedMentorIds = [];
   bool _isLoadingMentors = true;
 
@@ -37,8 +40,7 @@ class _AddHackathonState extends State<AddHackathon> {
       _isLoadingMentors = true;
     });
     try {
-      List<UserModel> mentors = await _hackathonDb
-          .getUsersByType("mentor"); // Fetch UserModel mentors
+      List<UserModel> mentors = await _hackathonDb.getUsersByType("Mentor");
       setState(() {
         _availableMentors = mentors;
         _isLoadingMentors = false;
@@ -62,9 +64,17 @@ class _AddHackathonState extends State<AddHackathon> {
     if (_formKey.currentState!.validate()) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? uid = prefs.getString("uid");
+
+      // **Fetch UserModel objects for selected mentor IDs:**
+      List<UserModel> selectedMentors = [];
+      if (_selectedMentorIds.isNotEmpty) {
+        selectedMentors = await _hackathonDb
+            .getUsersByIds(_selectedMentorIds); // NEW FUNCTION CALL
+      }
+
       Hackathon hackathon = Hackathon(
         name: _nameController.text,
-        mentors: _selectedMentorIds,
+        mentors: selectedMentors, // ✅ Pass List<UserModel> here
         companyId: uid ?? "unknown",
         maxTeams: int.parse(_maxTeamsController.text),
         status: status,
@@ -72,11 +82,14 @@ class _AddHackathonState extends State<AddHackathon> {
       );
       print("done here is the hackathon ${hackathon.toMap()}");
       //add the hackathon
+      for (var mentor in selectedMentors) {
+        await _userDb.assignHackathon(mentor.id);
+      }
       bool result = await _hackathonDb.addHackathon(hackathon);
       if (result) {
         print("------------------------------done--------------------------");
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const CompanyHackathonsPage()));
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AddHackathon()));
       } else {
         showDialog(
           context: context,

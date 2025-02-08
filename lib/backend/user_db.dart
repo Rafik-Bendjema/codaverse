@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:gdg_hack/backend/hachathon_db.dart';
 import 'package:gdg_hack/models/Hackathon.dart';
 import 'package:gdg_hack/models/userModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UserDb {
   Future<UserModel> createUser();
@@ -50,9 +51,27 @@ class userDb_impl implements UserDb {
   }
 
   @override
-  Future<bool> assignHackathon(String id) {
-    // TODO: implement assignHackathon
-    throw UnimplementedError();
+  Future<bool> assignHackathon(String hackathonId) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId =
+          prefs.getString("uid"); // Get user ID from SharedPreferences
+
+      if (userId == null) {
+        print("User ID not found. Cannot assign hackathon.");
+        return false; // Or handle this case as needed
+      }
+
+      await _firestore.collection('users').doc(userId).update({
+        'hackathon_id': hackathonId,
+      });
+      print(
+          "Hackathon assigned successfully for user: $userId, hackathonId: $hackathonId");
+      return true;
+    } catch (e) {
+      print("Error assigning hackathon to user: $e");
+      return false;
+    }
   }
 
   @override

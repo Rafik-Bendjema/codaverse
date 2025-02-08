@@ -10,11 +10,16 @@ abstract class HackathonDb {
   Future<Hackathon?> getHackathonForUser(String userId);
   Future<List<Hackathon>> getHackathonsByCompany(String companyId);
   Future<void> updateHackathonState(String hackathonId, String newState);
+  Future<List<UserModel>> getUsersByType(
+      String userType); // Function to fetch users by type
+  Future<List<UserModel>> getUsersByIds(List<String> userIds); // NEW FUNCTION
 }
 
 class FirestoreHackathonDb implements HackathonDb {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collectionPath = 'hackathons';
+  final String hackathonsCollection = 'hackathons';
+  final String usersCollection = 'users';
+  final String _collectionPath = "hackathons";
 
   @override
   Future<List<UserModel>> getUsersByType(String userType) async {
@@ -22,7 +27,7 @@ class FirestoreHackathonDb implements HackathonDb {
       QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
           .instance
           .collection('users')
-          .where('type', isEqualTo: userType)
+          .where('role', isEqualTo: userType)
           .get();
 
       return snapshot.docs
@@ -30,15 +35,35 @@ class FirestoreHackathonDb implements HackathonDb {
           .toList();
     } catch (e) {
       print("Error fetching users by type: $e");
-      return []; // Or handle error appropriately
+      return [];
+    }
+  }
+
+  @override
+  Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
+    // NEW FUNCTION IMPLEMENTATION
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .where(FieldPath.documentId,
+              whereIn: userIds) // Filter by document IDs
+          .get();
+
+      return snapshot.docs
+          .map((doc) => UserModel.fromMap(doc.id, doc.data()))
+          .toList();
+    } catch (e) {
+      print("Error fetching users by IDs: $e");
+      return [];
     }
   }
 
   @override
   Future<List<Hackathon>> getHackathonsByCompany(String companyId) async {
     try {
-      var querySnapshot = await FirebaseFirestore.instance
-          .collection('hackathons')
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
+          .collection(hackathonsCollection)
           .where('company_id', isEqualTo: companyId)
           .get();
 

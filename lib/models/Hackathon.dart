@@ -9,7 +9,7 @@ class Hackathon {
   String? id;
   String name;
   List<Team> teams;
-  List<UserModel> mentors = [];
+  List<UserModel> mentors = []; // Initialize as empty list
   String companyId;
   int maxTeams;
   String status;
@@ -32,7 +32,8 @@ class Hackathon {
       'name': name,
       'company_id': companyId,
       'maxTeams': maxTeams,
-      'mentors': mentors,
+      'mentors':
+          mentors.map((mentor) => mentor.id).toList(), // Store mentor IDs
       'status': status,
     };
   }
@@ -46,7 +47,7 @@ class Hackathon {
         .collection('teams')
         .get();
 
-    print("Here are the teams: ${teamsQuery.docs.length}");
+    print("Hackathon.fromMap - Here are the teams: ${teamsQuery.docs.length}");
 
     var listTeams = await Future.wait(
       teamsQuery.docs.map((doc) => Team.fromMap(doc.id, doc.data())),
@@ -54,17 +55,29 @@ class Hackathon {
 
     // Fetch mentors
     List<String> mentorIds = List<String>.from(data['mentors'] ?? []);
+    print(
+        "Hackathon.fromMap - mentorIds from hackathon doc: $mentorIds"); // LOG 1
+
     List<UserModel> mentors = [];
 
     if (mentorIds.isNotEmpty) {
+      print(
+          "Hackathon.fromMap - Fetching mentors with IDs: $mentorIds"); // LOG 2
       var mentorsQuery = await FirebaseFirestore.instance
           .collection('users')
           .where(FieldPath.documentId, whereIn: mentorIds)
           .get();
+      print(
+          "Hackathon.fromMap - MentorsQuery snapshot size: ${mentorsQuery.size}"); // LOG 3
 
       mentors = mentorsQuery.docs
           .map((doc) => UserModel.fromMap(doc.id, doc.data()))
           .toList();
+      print(
+          "Hackathon.fromMap - Number of mentors fetched: ${mentors.length}"); // LOG 4
+    } else {
+      print(
+          "Hackathon.fromMap - No mentor IDs found in hackathon doc."); // LOG 5
     }
 
     return Hackathon(
