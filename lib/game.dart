@@ -10,6 +10,7 @@ import 'package:gdg_hack/models/userModel.dart';
 import 'package:gdg_hack/player.dart'; // Assuming Player class is in player.dart
 import 'package:gdg_hack/table.dart';
 import 'package:gdg_hack/private_chat_dialog.dart';
+import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart'; // ADD THIS LINE - Jitsi Meet import
 
 class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
   final Hackathon hackathon;
@@ -22,6 +23,8 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
   late RealtimePositionService realtimeService;
   String? mainPlayerId;
   final UserDb _userDb = userDb_impl(); // Instantiate UserDb
+  late PositionComponent
+      videoCallButton; // ADD THIS LINE - Declare video call button
 
   final Function(String senderId, String message) _handleIncomingMessage;
 
@@ -201,4 +204,6 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
       hoveredPlayer = null;
     }
   }
+
+  // ADD THIS FUNCTION - Join Video Call Function
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gdg_hack/game.dart';
 import 'package:gdg_hack/backend/realtimeService.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
 import 'models/Hackathon.dart';
 import 'package:gdg_hack/private_chat_dialog.dart';
@@ -100,12 +101,28 @@ class _PlaygroundState extends State<Playground> {
     }
   }
 
+  void _joinVideoCall() {
+    var jitsi = JitsiMeet();
+    var options = JitsiMeetConferenceOptions(
+      room:
+          "codavers-hackathon-${widget.hackathon.id}", // Unique room name based on hackathon ID
+    );
+
+    jitsi.join(options);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_hackathon.name),
         actions: [
+          IconButton(
+              onPressed: () {
+                // ✅ ADDED: Call _joinVideoCall when button is pressed
+                _joinVideoCall();
+              },
+              icon: Icon(Icons.video_call)),
           IconButton(
             onPressed: () {
               _openPrivateChatSession();
