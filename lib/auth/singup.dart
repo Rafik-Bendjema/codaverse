@@ -28,10 +28,6 @@ class _SignupPageState extends State<SignupPage> {
       _isCompany, // Boolean value
       "", // Hackathon ID remains empty
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.toString())),
-    );
   }
 
   @override

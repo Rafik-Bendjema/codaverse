@@ -23,7 +23,7 @@ class AuthService implements BaseAuthService {
   /// Saves user data in SharedPreferences
   Future<void> _saveUserToLocal(UserModel user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("uid", user.id);
+    await prefs.setString("uid", user.id ?? "");
     await prefs.setString("name", user.name);
     await prefs.setString("role", user.role);
     await prefs.setBool("isCompany", user.isCompany);
@@ -61,11 +61,9 @@ class AuthService implements BaseAuthService {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      String userId = _uuid.v4(); // Generate unique ID
-
       // Create UserModel instance
       UserModel user = UserModel(
-        id: userId,
+        id: userCredential.user!.uid,
         name: name,
         role: role,
         isCompany: isCompany,
@@ -73,10 +71,7 @@ class AuthService implements BaseAuthService {
       );
 
       // Save user to Firestore
-      await _firestore
-          .collection("users")
-          .doc(userCredential.user!.uid)
-          .set(user.toMap());
+      await _firestore.collection("users").doc(user.id).set(user.toMap());
 
       // Save user data locally
       await _saveUserToLocal(user);

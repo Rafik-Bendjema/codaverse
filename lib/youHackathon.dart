@@ -4,6 +4,7 @@ import 'package:gdg_hack/backend/hachathon_db.dart';
 import 'package:gdg_hack/game.dart';
 import 'package:gdg_hack/models/Hackathon.dart';
 import 'package:gdg_hack/playGround.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class YourHackathonPage extends StatefulWidget {
   const YourHackathonPage({super.key});
@@ -23,7 +24,9 @@ class _YourHackathonPageState extends State<YourHackathonPage> {
   }
 
   void getHackathon() async {
-    hackathon = await _hackathonDb.getHackathon("wjUWldo1E6xLXQLOKPhb");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('uid');
+    hackathon = await _hackathonDb.getHackathonForUser(userId!);
     print("here is the return of the hackathon ${hackathon?.toMap()}");
     setState(() {});
   }
@@ -50,6 +53,11 @@ class _YourHackathonPageState extends State<YourHackathonPage> {
                   Text("Status: ${hackathon!.status}"),
                   Text("Max Teams: ${hackathon!.maxTeams}"),
                   const SizedBox(height: 20),
+                  const Text("Mentors:",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...hackathon!.mentors
+                      .map((mentor) => ListTile(title: Text(mentor.name))),
                   const Text("Teams:",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -70,6 +78,14 @@ class _YourHackathonPageState extends State<YourHackathonPage> {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             Playground(hackathon: hackathon!)));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        "the hackathon is still not running"),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
                               }
                             },
                             child: Text(

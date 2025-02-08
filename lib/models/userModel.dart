@@ -1,5 +1,3 @@
-import 'package:flame/components.dart';
-
 class UserModel {
   String id;
   String name;

@@ -19,17 +19,6 @@ class _LoginPageState extends State<LoginPage> {
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
-
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login Successful!")),
-      );
-      // Navigate to home or dashboard
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
-      );
-    }
   }
 
   @override
