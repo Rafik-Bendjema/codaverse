@@ -82,7 +82,7 @@ class Codavers extends FlameGame with TapDetector, MouseMovementDetector {
       // Fetch role for other players
       String otherPlayerRole = "player"; // Default role
       UserModel? otherUserModel = await _userDb.getUser(playerId);
-      if (otherUserModel != null && otherUserModel.role == 'mentor') {
+      if (otherUserModel != null && otherUserModel.role == 'Mentor') {
         otherPlayerRole = 'mentor';
       }
 
